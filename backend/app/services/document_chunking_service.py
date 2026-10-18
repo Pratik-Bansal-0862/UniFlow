@@ -1,0 +1,38 @@
+
+def chunk_text(
+    text: str,
+    chunk_size: int = 1000,
+    overlap: int = 150,
+) -> list[str]:
+    """Split text into overlapping character-based chunks."""
+
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be positive.")
+
+    if overlap < 0 or overlap >= chunk_size:
+        raise ValueError(
+            "overlap must be non-negative and smaller "
+            "than chunk_size."
+        )
+
+    cleaned_text = text.strip()
+
+    if not cleaned_text:
+        return []
+
+    chunks = []
+    start = 0
+
+    while start < len(cleaned_text):
+        end = min(start + chunk_size, len(cleaned_text))
+        chunk = cleaned_text[start:end].strip()
+
+        if chunk:
+            chunks.append(chunk)
+
+        if end == len(cleaned_text):
+            break
+
+        start = end - overlap
+
+    return chunks
