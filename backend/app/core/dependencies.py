@@ -1,4 +1,5 @@
-from collections.abc import Generator
+﻿from collections.abc import Generator
+from typing import Annotated
 from uuid import UUID
 
 import jwt
@@ -6,11 +7,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from typing import Annotated
 
 from app.core.config import settings
 from app.core.database import SessionLocal
-from app.core.security import create_access_token
 from app.models.student import Student
 
 
