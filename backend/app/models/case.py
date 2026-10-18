@@ -1,3 +1,4 @@
+
 import uuid
 from datetime import date, datetime
 
@@ -10,15 +11,17 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    and_,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, foreign, mapped_column, relationship
 
 from app.core.database import Base
 
 
 class Case(Base):
     __tablename__ = "cases"
+
     __table_args__ = (
         UniqueConstraint("id", "student_id", name="uq_cases_id_student_id"),
         CheckConstraint(
@@ -72,8 +75,11 @@ class Case(Base):
         nullable=False,
     )
 
-    student: Mapped["Student"] = relationship(back_populates="cases")
+    student: Mapped["Student"] = relationship(
+        back_populates="cases",
+    )
     tasks: Mapped[list["Task"]] = relationship(
         back_populates="case",
         cascade="all, delete-orphan",
+        primaryjoin="and_(Case.id == foreign(Task.case_id), Case.student_id == Task.student_id)",
     )

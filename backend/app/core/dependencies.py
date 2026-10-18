@@ -1,19 +1,23 @@
 from collections.abc import Generator
-
-from sqlalchemy.orm import Session
-from app.core.database import SessionLocal
-
-from typing import Annotated
 from uuid import UUID
 
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
+from sqlalchemy.orm import Session
+from typing import Annotated
 
+from app.core.config import settings
+from app.core.database import SessionLocal
+from app.core.security import create_access_token
 from app.models.student import Student
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/auth/login"
+)
+
 
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
@@ -22,13 +26,14 @@ def get_db() -> Generator[Session, None, None]:
     finally:
         db.close()
 
+
 def get_current_student(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[Session, Depends(get_db)],
 ) -> Student:
     credentials_error = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid or expired access token",
+        detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
@@ -41,18 +46,16 @@ def get_current_student(
         subject = payload.get("sub")
         if not isinstance(subject, str):
             raise credentials_error
+
         student_id = UUID(subject)
     except (jwt.InvalidTokenError, ValueError):
         raise credentials_error from None
 
-    student = db.scalars(
-        select(Student).where(
-            Student.id == student_id,
-            Student.is_active.is_(True),
-        )
-    ).first()
+    student = db.scalar(
+        select(Student).where(Student.id == student_id)
+    )
 
-    if student is None:
+    if student is None or not student.is_active:
         raise credentials_error
 
     return student

@@ -1,3 +1,4 @@
+
 import uuid
 from datetime import datetime
 
@@ -46,4 +47,5 @@ class Student(Base):
     tasks: Mapped[list["Task"]] = relationship(
         back_populates="student",
         cascade="all, delete-orphan",
+        foreign_keys="Task.student_id",
     )
