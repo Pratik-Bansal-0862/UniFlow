@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -31,3 +31,5 @@ class DocumentSearchRequest(BaseModel):
 
 class DocumentSearchResponse(BaseModel):
     results: list[RetrievedDocumentChunk]
+    answer: str | None = None
+    answer_status: str = "not_requested"

@@ -1,4 +1,4 @@
-from app.schemas.document import (
+﻿from app.schemas.document import (
     DocumentResponse,
     DocumentSearchRequest,
     DocumentSearchResponse,
@@ -11,11 +11,11 @@ import logging
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from app.services.document_answer_service import DocumentAnswerService
 
 from app.core.dependencies import get_current_student, get_db
 from app.models.document import Document
 from app.models.student import Student
-from app.schemas.document import DocumentResponse
 from app.services.document_ingestion_service import DocumentIngestionService
 from app.services.document_retrieval_service import DocumentRetrievalService
 
@@ -114,7 +114,26 @@ def search_documents(
             for item in retrieved_chunks
         ]
 
-        return DocumentSearchResponse(results=results)
+        evidence = [
+            {
+                "source_name": item.chunk.source_name,
+                "page_number": item.chunk.page_number,
+                "chunk_index": item.chunk.chunk_index,
+                "text": item.chunk.text[:4000],
+            }
+            for item in retrieved_chunks
+        ]
+
+        answer, answer_status = DocumentAnswerService().answer(
+            request.query,
+            evidence,
+        )
+
+        return DocumentSearchResponse(
+            results=results,
+            answer=answer,
+            answer_status=answer_status,
+        )
 
     except ValueError as exc:
         raise HTTPException(
@@ -122,9 +141,8 @@ def search_documents(
             detail=str(exc),
         ) from exc
     except Exception as exc:
+        logger.exception("Document search failed.")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Document search failed.",
         ) from exc
-
-
