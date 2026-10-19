@@ -1,3 +1,9 @@
+from app.schemas.document import (
+    DocumentResponse,
+    DocumentSearchRequest,
+    DocumentSearchResponse,
+    RetrievedDocumentChunk,
+)
 
 from typing import Annotated
 
@@ -10,6 +16,7 @@ from app.models.document import Document
 from app.models.student import Student
 from app.schemas.document import DocumentResponse
 from app.services.document_ingestion_service import DocumentIngestionService
+from app.services.document_retrieval_service import DocumentRetrievalService
 
 router = APIRouter()
 
@@ -77,3 +84,43 @@ def list_documents(
         .order_by(Document.created_at.desc())
     )
     return list(db.scalars(statement).all())
+
+@router.post("/search", response_model=DocumentSearchResponse)
+def search_documents(
+    request: DocumentSearchRequest,
+    current_student: Annotated[Student, Depends(get_current_student)],
+) -> DocumentSearchResponse:
+    try:
+        service = DocumentRetrievalService()
+
+        retrieved_chunks = service.retrieve(
+            request.query,
+            student_id=str(current_student.id),
+            limit=request.limit,
+        )
+
+        results = [
+            RetrievedDocumentChunk(
+                document_id=item.chunk.document_id,
+                filename=item.chunk.source_name,
+                text=item.chunk.text,
+                chunk_index=item.chunk.chunk_index,
+                distance=item.distance,
+            )
+            for item in retrieved_chunks
+        ]
+
+        return DocumentSearchResponse(results=results)
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Document search failed.",
+        ) from exc
+
+
