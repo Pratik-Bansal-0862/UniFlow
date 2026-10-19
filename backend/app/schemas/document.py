@@ -22,3 +22,12 @@ class RetrievedDocumentChunk(BaseModel):
     text: str
     chunk_index: int = Field(ge=0)
     distance: float
+
+
+class DocumentSearchRequest(BaseModel):
+    query: str = Field(min_length=1, max_length=2000)
+    limit: int = Field(default=5, ge=1, le=20)
+
+
+class DocumentSearchResponse(BaseModel):
+    results: list[RetrievedDocumentChunk]
