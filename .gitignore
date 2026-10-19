@@ -221,3 +221,9 @@ __marimo__/
 
 #.rar files
 *.rar
+# UniFlow local development data
+backend/data/
+backend/.pytest_cache/
+frontend/node_modules/
+frontend/.next/
+.env.local

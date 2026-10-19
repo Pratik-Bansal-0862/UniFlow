@@ -6,6 +6,7 @@ from app.schemas.document import (
 )
 
 from typing import Annotated
+import logging
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import select
@@ -17,6 +18,8 @@ from app.models.student import Student
 from app.schemas.document import DocumentResponse
 from app.services.document_ingestion_service import DocumentIngestionService
 from app.services.document_retrieval_service import DocumentRetrievalService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -66,7 +69,8 @@ def upload_document(
             detail=str(exc),
         ) from exc
     except Exception as exc:
-        # Avoid exposing database, storage, or model internals to clients.
+        logger.exception("Document ingestion failed for file %r", filename)
+        # Keep internal details out of the API response.
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Document ingestion failed.",
