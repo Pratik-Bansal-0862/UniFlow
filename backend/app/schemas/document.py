@@ -1,3 +1,4 @@
+﻿from typing import Optional
 from datetime import datetime
 from uuid import UUID
 
@@ -21,7 +22,7 @@ class RetrievedDocumentChunk(BaseModel):
     filename: str
     text: str
     chunk_index: int = Field(ge=0)
-    distance: float
+    distance: Optional[float] = None
 
 
 class DocumentSearchRequest(BaseModel):
