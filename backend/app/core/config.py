@@ -1,7 +1,7 @@
-﻿from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
+﻿from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
+    greenhouse_boards: str = Field(default="", validation_alias="UNIFLOW_GREENHOUSE_BOARDS")
     app_name: str = "UniFlow API"
     environment: str = "development"
     api_v1_prefix: str = "/api/v1"
@@ -29,3 +29,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
