@@ -1,6 +1,6 @@
-from fastapi import APIRouter
+﻿from fastapi import APIRouter
 
-from app.api.v1 import auth, documents, health, orchestrator
+from app.api.v1 import auth, documents, health, opportunities, orchestrator
 
 api_router = APIRouter()
 
@@ -15,4 +15,9 @@ api_router.include_router(
     orchestrator.router,
     prefix="/orchestrator",
     tags=["Orchestrator"],
+)
+api_router.include_router(
+    opportunities.router,
+    prefix="/opportunities",
+    tags=["Opportunities"],
 )
