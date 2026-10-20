@@ -1,5 +1,5 @@
- "use client";
-
+"use client";
+import { EmbeddingExplorer } from "@/components/embedding-explorer";
 import { useState } from "react";
 import OpportunitiesPanel from "./opportunities-panel";
 
@@ -49,13 +49,13 @@ type PlanResponse = Partial<AgentPlan> & { detail?: string };
 type Section = "Overview" | "Opportunities" | "AI Planner" | "Documents" | "Tasks" | "Approvals" | "Settings";
 
 const navigation: { label: Section; icon: string; subtitle: string }[] = [
-  { label: "Overview", icon: "◫", subtitle: "Your student workspace" },
-  { label: "Opportunities", icon: "✦", subtitle: "Discover and track opportunities" },
-  { label: "AI Planner", icon: "✳", subtitle: "Turn goals into action plans" },
-  { label: "Documents", icon: "▤", subtitle: "Upload and search your files" },
-  { label: "Tasks", icon: "✓", subtitle: "Keep your next steps organized" },
-  { label: "Approvals", icon: "↗", subtitle: "Review actions before they happen" },
-  { label: "Settings", icon: "⚙", subtitle: "Account and workspace" },
+  { label: "Overview", icon: "home", subtitle: "Your student workspace" },
+  { label: "Opportunities", icon: "compass", subtitle: "Discover and track opportunities" },
+  { label: "AI Planner", icon: "sparkles", subtitle: "Turn goals into action plans" },
+  { label: "Documents", icon: "file-text", subtitle: "Upload and search your files" },
+  { label: "Tasks", icon: "check-square", subtitle: "Keep your next steps organized" },
+  { label: "Approvals", icon: "clipboard-check", subtitle: "Review actions before they happen" },
+  { label: "Settings", icon: "settings", subtitle: "Account and workspace" },
 ];
 
 export default function Home() {
@@ -248,7 +248,17 @@ export default function Home() {
             {navigation.map((item) => (
               <button key={item.label} type="button" onClick={() => openSection(item.label)}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium transition ${section === item.label ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
-                <span className="grid h-7 w-7 place-items-center rounded-lg bg-white text-base shadow-sm">{item.icon}</span>
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white text-indigo-600 shadow-sm">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {item.icon === "home" && <><path d="m3 10 9-7 9 7" /><path d="M5 9v12h14V9M9 21v-7h6v7" /></>}
+    {item.icon === "compass" && <><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5z" /></>}
+    {item.icon === "sparkles" && <><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" /><path d="m19 14 1 2.5 2 1-2 1-1 2.5-1-2.5-2-1 2-1z" /></>}
+    {item.icon === "file-text" && <><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v5h4M9 12h6M9 16h6" /></>}
+    {item.icon === "check-square" && <><rect x="4" y="4" width="16" height="16" rx="2" /><path d="m8 12 3 3 5-6" /></>}
+    {item.icon === "clipboard-check" && <><rect x="5" y="5" width="14" height="16" rx="2" /><path d="M9 5V3h6v2m-7 7 2 2 4-4" /></>}
+    {item.icon === "settings" && <><circle cx="12" cy="12" r="3" /><path d="m19.4 15 .1.1 1.1 1.9-2 3.4-2.2-.6a8 8 0 0 1-2 .9L14 23h-4l-.4-2.3a8 8 0 0 1-2-.9l-2.2.6-2-3.4 1.1-1.9a8 8 0 0 1 0-2.2l-1.1-1.9 2-3.4 2.2.6a8 8 0 0 1 2-.9L10 5h4l.4 2.3a8 8 0 0 1 2 .9l2.2-.6 2 3.4-1.1 1.9a8 8 0 0 1-.1 2.1z" transform="translate(0 -2) scale(1 .95)" /></>}
+  </svg>
+</span>
                 <span className="flex-1">{item.label}</span>
                 {["Tasks", "Approvals"].includes(item.label) && <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-slate-500">Soon</span>}
               </button>
@@ -269,7 +279,7 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <button type="button" onClick={checkProfile} disabled={busy !== null}
                 className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
-                {busy === "profile" ? "Checking…" : "Check session"}
+                {busy === "profile" ? "Checking”¦" : "Check session"}
               </button>
               <div className="grid h-10 w-10 place-items-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">{signedIn ? String(displayName).slice(0, 1).toUpperCase() : "S"}</div>
             </div>
@@ -291,7 +301,7 @@ export default function Home() {
                     <h2 className="mt-3 text-3xl font-bold leading-tight tracking-tight md:text-4xl">Make room for what matters.</h2>
                     <p className="mt-4 max-w-xl text-sm leading-6 text-indigo-100 md:text-base">Bring your student documents together, turn goals into practical plans, and keep important decisions in your hands.</p>
                     <div className="mt-7 flex flex-wrap gap-3">
-                      <button type="button" onClick={() => setSection("AI Planner")} className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-sm hover:bg-indigo-50">Create an AI plan <span aria-hidden="true">↗</span></button>
+                      <button type="button" onClick={() => setSection("AI Planner")} className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-sm hover:bg-indigo-50">Create an AI plan <span aria-hidden="true">â†—</span></button>
                       <button type="button" onClick={() => setSection("Documents")} className="rounded-xl border border-white/30 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15">Manage documents</button>
                     </div>
                   </div>
@@ -310,7 +320,7 @@ export default function Home() {
                   <section className="rounded-2xl border border-slate-200 bg-white p-6">
                     <div className="flex items-start justify-between gap-4">
                       <div><p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400">Quick start</p><h3 className="mt-2 text-lg font-bold">Build your student context</h3><p className="mt-1 text-sm text-slate-500">Upload a resume or opportunity brief to ground your first plan.</p></div>
-                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-50 text-lg text-indigo-700">✳</span>
+                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-50 text-lg text-indigo-700">âœ³</span>
                     </div>
                     <ol className="mt-5 space-y-4">
                       <QuickStep number="01" title="Sign in to your workspace" detail="Use your existing account or create one below." />
@@ -339,7 +349,7 @@ export default function Home() {
                     {mode === "register" && <Field label="Full name (optional)"><input value={fullName} onChange={(event) => setFullName(event.target.value)} maxLength={200} className={inputClass} placeholder="Student name" /></Field>}
                     <Field label="Email"><input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} className={inputClass} placeholder="student@example.com" /></Field>
                     <Field label="Password"><input type="password" required minLength={mode === "register" ? 12 : undefined} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} className={inputClass} placeholder={mode === "register" ? "At least 12 characters" : "Your password"} /></Field>
-                    <div className="flex items-end"><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "auth" ? "Please wait…" : mode === "register" ? "Create account" : "Sign in"}</button></div>
+                    <div className="flex items-end"><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "auth" ? "Please wait”¦" : mode === "register" ? "Create account" : "Sign in"}</button></div>
                   </form>
                   {authResult && <ResponsePanel title="Authentication response" data={authResult} />}
                 </section>
@@ -349,10 +359,10 @@ export default function Home() {
             {section === "AI Planner" && (
               <>
                 <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
-                  <div className="flex items-start gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-indigo-50 text-2xl text-indigo-700">✳</span><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Evidence-grounded planning</p><h2 className="mt-1 text-2xl font-bold tracking-tight">What would you like to work toward?</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">UniFlow uses your relevant uploaded documents to create a draft plan. It does not send emails, submit applications, or perform external actions.</p></div></div>
+                  <div className="flex items-start gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-indigo-50 text-2xl text-indigo-700">âœ³</span><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Evidence-grounded planning</p><h2 className="mt-1 text-2xl font-bold tracking-tight">What would you like to work toward?</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">UniFlow uses your relevant uploaded documents to create a draft plan. It does not send emails, submit applications, or perform external actions.</p></div></div>
                   <form onSubmit={createPlan} className="mt-7 space-y-4">
-                    <label className="block text-sm font-semibold text-slate-700">Your objective<textarea required minLength={1} maxLength={2000} rows={5} value={objective} onChange={(event) => setObjective(event.target.value)} className={`${inputClass} mt-2 resize-y leading-6`} placeholder="Describe the outcome you want and any constraints…" /></label>
-                    <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-slate-400">{objective.length}/2000 characters · Upload relevant documents first</span><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "plan" ? "Building draft…" : "Generate draft plan ↗"}</button></div>
+                    <label className="block text-sm font-semibold text-slate-700">Your objective<textarea required minLength={1} maxLength={2000} rows={5} value={objective} onChange={(event) => setObjective(event.target.value)} className={`${inputClass} mt-2 resize-y leading-6`} placeholder="Describe the outcome you want and any constraints”¦" /></label>
+                    <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-slate-400">{objective.length}/2000 characters · Upload relevant documents first</span><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "plan" ? "Building draft”¦" : "Generate draft plan â†—"}</button></div>
                   </form>
                 </section>
 
@@ -372,12 +382,12 @@ export default function Home() {
             {section === "Documents" && (
               <>
                 <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
-                  <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Knowledge base</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Your documents</h2><p className="mt-2 text-sm leading-6 text-slate-500">Upload PDF or DOCX files to make relevant context available to document search and AI planning.</p></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-indigo-50 text-xl text-indigo-700">▤</span></div>
+                  <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Knowledge base</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Your documents</h2><p className="mt-2 text-sm leading-6 text-slate-500">Upload PDF or DOCX files to make relevant context available to document search and AI planning.</p></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-indigo-50 text-xl text-indigo-700">â–¤</span></div>
                   <form onSubmit={uploadDocument} className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
                     <label className="block text-sm font-semibold">Choose a document<input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => setFile(event.target.files?.[0] ?? null)} className="mt-3 block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-100 file:px-4 file:py-2 file:font-semibold file:text-indigo-700 hover:file:bg-indigo-200" /></label>
                     <p className="mt-3 text-xs text-slate-400">PDF or DOCX · Maximum 15 MB</p>
                     {file && <p className="mt-2 text-sm text-slate-600">Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)</p>}
-                    <button type="submit" disabled={busy !== null} className={`${primaryButton} mt-5`}>{busy === "upload" ? "Uploading and processing…" : "Upload document"}</button>
+                    <button type="submit" disabled={busy !== null} className={`${primaryButton} mt-5`}>{busy === "upload" ? "Uploading and processing”¦" : "Upload document"}</button>
                   </form>
                   {uploadResult && <ResponsePanel title="Upload result" data={uploadResult} />}
                 </section>
@@ -386,7 +396,7 @@ export default function Home() {
                   <p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Semantic search</p><h2 className="mt-1 text-xl font-bold">Find information in your files</h2><p className="mt-2 text-sm text-slate-500">Get an AI-generated answer grounded in your files, alongside the source text it uses.</p>
                   <form onSubmit={searchDocuments} className="mt-5 space-y-4">
                     <label className="block text-sm font-semibold">Search query<textarea required minLength={1} maxLength={2000} value={query} onChange={(event) => setQuery(event.target.value)} rows={3} className={`${inputClass} mt-2 resize-y`} placeholder="What does my resume say about project experience?" /></label>
-                    <div className="flex flex-wrap items-end gap-4"><label className="block text-sm font-semibold">Maximum results (1–20)<input type="number" min={1} max={20} step={1} required value={limit} onChange={(event) => setLimit(event.target.value)} className={`${inputClass} mt-2 w-36`} /></label><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "search" ? "Searching…" : "Search documents"}</button></div>
+                    <div className="flex flex-wrap items-end gap-4"><label className="block text-sm font-semibold">Maximum results (1–20)<input type="number" min={1} max={20} step={1} required value={limit} onChange={(event) => setLimit(event.target.value)} className={`${inputClass} mt-2 w-36`} /></label><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "search" ? "Searching”¦" : "Search documents"}</button></div>
                   </form>
                   {searchResult?.detail && <div className="mt-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{searchResult.detail}</div>}
                   {searchResult && (
@@ -424,13 +434,14 @@ export default function Home() {
 
             {(section === "Tasks" || section === "Approvals") && <ComingSoon section={section} onGoPlanner={() => setSection("AI Planner")} />}
             {section === "Settings" && (
-              <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8"><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Workspace settings</p><h2 className="mt-1 text-2xl font-bold">Account and session</h2><p className="mt-2 text-sm leading-6 text-slate-500">UniFlow keeps the authentication token in an HTTP-only cookie. Check your current session below; no token or secret is displayed here.</p><button type="button" onClick={checkProfile} disabled={busy !== null} className={`${primaryButton} mt-5`}>{busy === "profile" ? "Checking…" : "Check current session"}</button>{profileResult && <ResponsePanel title="Profile response" data={profileResult} />}</section>
+              <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8"><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Workspace settings</p><h2 className="mt-1 text-2xl font-bold">Account and session</h2><p className="mt-2 text-sm leading-6 text-slate-500">UniFlow keeps the authentication token in an HTTP-only cookie. Check your current session below; no token or secret is displayed here.</p><button type="button" onClick={checkProfile} disabled={busy !== null} className={`${primaryButton} mt-5`}>{busy === "profile" ? "Checking”¦" : "Check current session"}</button>{profileResult && <ResponsePanel title="Profile response" data={profileResult} />}</section>
             )}
 
             <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-5 text-xs text-slate-400"><span>UniFlow · Student productivity workspace</span><span>AI plans are drafts · You stay in control</span></footer>
           </div>
         </div>
       </div>
+          <div className="mx-auto w-full max-w-7xl px-4 py-6"><EmbeddingExplorer /></div>
     </main>
   );
 }
@@ -456,5 +467,5 @@ function ResponsePanel({ title, data }: { title: string; data: ApiResult }) {
 
 function ComingSoon({ section, onGoPlanner }: { section: "Tasks" | "Approvals"; onGoPlanner: () => void }) {
   const isTasks = section === "Tasks";
-  return <section className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center md:px-12"><span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-indigo-50 text-3xl text-indigo-700">{isTasks ? "✓" : "↗"}</span><p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600">Planned feature</p><h2 className="mt-2 text-2xl font-bold">{isTasks ? "A clearer next step, every time." : "Your approval, always required."}</h2><p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">{isTasks ? "Task creation, status tracking, and reminders are not connected to the backend yet. We are keeping this area honest instead of showing mock tasks." : "Approval queues and controlled execution are not implemented yet. UniFlow currently creates draft plans only; it does not send emails or submit applications."}</p><button type="button" onClick={onGoPlanner} className={`${primaryButton} mt-6`}>Try the AI Planner</button></section>;
+  return <section className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center md:px-12"><span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-indigo-50 text-3xl text-indigo-700">{isTasks ? "âœ“" : "â†—"}</span><p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600">Planned feature</p><h2 className="mt-2 text-2xl font-bold">{isTasks ? "A clearer next step, every time." : "Your approval, always required."}</h2><p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">{isTasks ? "Task creation, status tracking, and reminders are not connected to the backend yet. We are keeping this area honest instead of showing mock tasks." : "Approval queues and controlled execution are not implemented yet. UniFlow currently creates draft plans only; it does not send emails or submit applications."}</p><button type="button" onClick={onGoPlanner} className={`${primaryButton} mt-6`}>Try the AI Planner</button></section>;
 }

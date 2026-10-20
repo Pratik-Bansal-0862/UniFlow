@@ -3,11 +3,14 @@ from __future__ import annotations
 import re
 from collections import Counter
 
+from app.integrations.chroma_vector_store import ChromaVectorStore
+from app.services.embedding_service import EmbeddingService
+
 
 class DocumentRetrievalService:
-    def __init__(self, embedding_service, vector_store):
-        self.embedding_service = embedding_service
-        self.vector_store = vector_store
+    def __init__(self, embedding_service=None, vector_store=None):
+        self.embedding_service = embedding_service or EmbeddingService()
+        self.vector_store = vector_store or ChromaVectorStore()
 
     @staticmethod
     def _terms(text: str) -> list[str]:

@@ -1,3 +1,4 @@
+﻿from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -14,4 +15,4 @@ class KnowledgeChunk(BaseModel):
 
 class RetrievedChunk(BaseModel):
     chunk: KnowledgeChunk
-    distance: float
+    distance: Optional[float]

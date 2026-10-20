@@ -18,6 +18,8 @@ from app.models.document import Document
 from app.models.student import Student
 from app.services.document_ingestion_service import DocumentIngestionService
 from app.services.document_retrieval_service import DocumentRetrievalService
+from app.services.embedding_service import EmbeddingService
+from app.integrations.chroma_vector_store import ChromaVectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +97,7 @@ def search_documents(
     current_student: Annotated[Student, Depends(get_current_student)],
 ) -> DocumentSearchResponse:
     try:
-        service = DocumentRetrievalService()
+        service = DocumentRetrievalService(embedding_service=EmbeddingService(), vector_store=ChromaVectorStore())
 
         retrieved_chunks = service.retrieve(
             request.query,
