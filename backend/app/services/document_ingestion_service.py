@@ -1,13 +1,14 @@
-﻿import uuid
+﻿
+import uuid
 
 from sqlalchemy.orm import Session
 
 from app.integrations.chroma_vector_store import ChromaVectorStore
+from app.models.document import Document
 from app.schemas.knowledge import KnowledgeChunk
 from app.services.document_chunking_service import chunk_text
 from app.services.document_extraction_service import extract_text
 from app.services.embedding_service import EmbeddingService
-from app.models.document import Document
 
 
 class DocumentIngestionService:
@@ -44,6 +45,8 @@ class DocumentIngestionService:
             raise ValueError("No readable text found in the document.")
 
         document_id = uuid.uuid4()
+        category = "unverified"
+
         document = Document(
             id=document_id,
             student_id=student_id,
@@ -51,11 +54,15 @@ class DocumentIngestionService:
             content_type=(
                 "application/pdf"
                 if safe_filename.lower().endswith(".pdf")
-                else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                else (
+                    "application/vnd.openxmlformats-officedocument."
+                    "wordprocessingml.document"
+                )
             ),
             file_size=len(content),
             chunk_count=len(pieces),
             status="indexed",
+            category=category,
         )
 
         chunks = [
@@ -66,6 +73,7 @@ class DocumentIngestionService:
                 text=piece,
                 chunk_index=index,
                 source_name=safe_filename,
+                category=category,
             )
             for index, piece in enumerate(pieces)
         ]
@@ -80,6 +88,7 @@ class DocumentIngestionService:
             return document
         except Exception:
             db.rollback()
-            # Remove any vector chunks written before a database failure.
-            self.vector_store.delete_document(str(document_id), str(student_id))
+            self.vector_store.delete_document(
+                str(document_id), str(student_id)
+            )
             raise

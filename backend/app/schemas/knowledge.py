@@ -1,6 +1,10 @@
-﻿from typing import Optional
+﻿
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
+
+
+DocumentCategory = Literal["personal", "reference", "unverified"]
 
 
 class KnowledgeChunk(BaseModel):
@@ -11,6 +15,7 @@ class KnowledgeChunk(BaseModel):
     chunk_index: int = Field(ge=0)
     source_name: str
     page_number: int | None = Field(default=None, ge=1)
+    category: DocumentCategory = "unverified"
 
 
 class RetrievedChunk(BaseModel):

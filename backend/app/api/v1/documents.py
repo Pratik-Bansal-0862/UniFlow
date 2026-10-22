@@ -1,28 +1,29 @@
-﻿from app.schemas.document import (
+﻿
+import logging
+from typing import Annotated
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.core.dependencies import get_current_student, get_db
+from app.integrations.chroma_vector_store import ChromaVectorStore
+from app.models.document import DOCUMENT_CATEGORIES, Document
+from app.models.student import Student
+from app.schemas.document import (
+    DocumentCategoryUpdate,
     DocumentResponse,
     DocumentSearchRequest,
     DocumentSearchResponse,
     RetrievedDocumentChunk,
 )
-
-from typing import Annotated
-import logging
-
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 from app.services.document_answer_service import DocumentAnswerService
-
-from app.core.dependencies import get_current_student, get_db
-from app.models.document import Document
-from app.models.student import Student
 from app.services.document_ingestion_service import DocumentIngestionService
 from app.services.document_retrieval_service import DocumentRetrievalService
 from app.services.embedding_service import EmbeddingService
-from app.integrations.chroma_vector_store import ChromaVectorStore
 
 logger = logging.getLogger(__name__)
-
 router = APIRouter()
 
 MAX_FILE_SIZE = 15 * 1024 * 1024
@@ -58,8 +59,7 @@ def upload_document(
         )
 
     try:
-        service = DocumentIngestionService()
-        return service.ingest(
+        return DocumentIngestionService().ingest(
             db,
             student_id=current_student.id,
             filename=filename,
@@ -72,7 +72,6 @@ def upload_document(
         ) from exc
     except Exception as exc:
         logger.exception("Document ingestion failed for file %r", filename)
-        # Keep internal details out of the API response.
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Document ingestion failed.",
@@ -91,13 +90,69 @@ def list_documents(
     )
     return list(db.scalars(statement).all())
 
+
+@router.patch("/{document_id}/category", response_model=DocumentResponse)
+def update_document_category(
+    document_id: UUID,
+    request: DocumentCategoryUpdate,
+    current_student: Annotated[Student, Depends(get_current_student)],
+    db: Annotated[Session, Depends(get_db)],
+) -> Document:
+    document = db.scalar(
+        select(Document).where(
+            Document.id == document_id,
+            Document.student_id == current_student.id,
+        )
+    )
+
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found.",
+        )
+
+    if request.category not in DOCUMENT_CATEGORIES:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid document category.",
+        )
+
+    vector_store = ChromaVectorStore()
+
+    try:
+        # Update Chroma metadata first. If this fails, leave the database
+        # record unchanged rather than creating an inconsistent category.
+        vector_store.update_document_category(
+            document_id=str(document.id),
+            student_id=str(current_student.id),
+            category=request.category,
+        )
+
+        document.category = request.category
+        db.commit()
+        db.refresh(document)
+        return document
+    except Exception as exc:
+        db.rollback()
+        logger.exception(
+            "Failed to update category for document %s", document_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update document category.",
+        ) from exc
+
+
 @router.post("/search", response_model=DocumentSearchResponse)
 def search_documents(
     request: DocumentSearchRequest,
     current_student: Annotated[Student, Depends(get_current_student)],
 ) -> DocumentSearchResponse:
     try:
-        service = DocumentRetrievalService(embedding_service=EmbeddingService(), vector_store=ChromaVectorStore())
+        service = DocumentRetrievalService(
+            embedding_service=EmbeddingService(),
+            vector_store=ChromaVectorStore(),
+        )
 
         retrieved_chunks = service.retrieve(
             request.query,
@@ -112,6 +167,7 @@ def search_documents(
                 text=item.chunk.text,
                 chunk_index=item.chunk.chunk_index,
                 distance=item.distance,
+                category=item.chunk.category,
             )
             for item in retrieved_chunks
         ]
@@ -121,6 +177,7 @@ def search_documents(
                 "source_name": item.chunk.source_name,
                 "page_number": item.chunk.page_number,
                 "chunk_index": item.chunk.chunk_index,
+                "category": item.chunk.category,
                 "text": item.chunk.text[:4000],
             }
             for item in retrieved_chunks

@@ -1,10 +1,14 @@
-﻿import uuid
+﻿
+import uuid
 from datetime import datetime
 
 from sqlalchemy import BigInteger, DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+
+
+DOCUMENT_CATEGORIES = ("personal", "reference", "unverified")
 
 
 class Document(Base):
@@ -25,6 +29,19 @@ class Document(Base):
     status: Mapped[str] = mapped_column(
         String(30), default="indexed", nullable=False
     )
+
+    # Keep the API/Python attribute named "category" while mapping to
+    # the existing database column.
+    category: Mapped[str] = mapped_column(
+        "document_role",
+        String(20),
+        default="unverified",
+        server_default="unverified",
+        nullable=False,
+    )
+
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
     )

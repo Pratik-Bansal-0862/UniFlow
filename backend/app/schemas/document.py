@@ -1,8 +1,12 @@
-﻿from typing import Optional
+﻿
 from datetime import datetime
+from typing import Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+DocumentCategory = Literal["personal", "reference", "unverified"]
 
 
 class DocumentResponse(BaseModel):
@@ -12,9 +16,14 @@ class DocumentResponse(BaseModel):
     file_size: int
     chunk_count: int
     status: str
+    category: DocumentCategory
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DocumentCategoryUpdate(BaseModel):
+    category: DocumentCategory
 
 
 class RetrievedDocumentChunk(BaseModel):
@@ -23,6 +32,7 @@ class RetrievedDocumentChunk(BaseModel):
     text: str
     chunk_index: int = Field(ge=0)
     distance: Optional[float] = None
+    category: DocumentCategory = "unverified"
 
 
 class DocumentSearchRequest(BaseModel):
