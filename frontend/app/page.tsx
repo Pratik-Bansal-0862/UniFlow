@@ -2,6 +2,7 @@
 import { EmbeddingExplorer } from "@/components/embedding-explorer";
 import { useCallback, useState } from "react";
 import OpportunitiesPanel from "./opportunities-panel";
+import StudentProfilePanel from "./student-profile-panel";
 
 type ApiResult = {
   detail?: string;
@@ -57,11 +58,12 @@ type AgentPlan = {
 
 type PlanResponse = Partial<AgentPlan> & { detail?: string };
 
-type Section = "Overview" | "Opportunities" | "AI Planner" | "Documents" | "Tasks" | "Approvals" | "Settings";
+type Section = "Overview" | "Opportunities" | "Student Profile" | "AI Planner" | "Documents" | "Tasks" | "Approvals" | "Settings";
 
 const navigation: { label: Section; icon: string; subtitle: string }[] = [
   { label: "Overview", icon: "home", subtitle: "Your student workspace" },
   { label: "Opportunities", icon: "compass", subtitle: "Discover and track opportunities" },
+  { label: "Student Profile", icon: "user-round", subtitle: "Review your skills and experience" },
   { label: "AI Planner", icon: "sparkles", subtitle: "Turn goals into action plans" },
   { label: "Documents", icon: "file-text", subtitle: "Upload and search your files" },
   { label: "Tasks", icon: "check-square", subtitle: "Keep your next steps organized" },
@@ -360,6 +362,7 @@ export default function Home() {
 
           <div className="mx-auto max-w-6xl space-y-7 px-4 py-6 md:px-9 md:py-9">
             {section === "Opportunities" && <OpportunitiesPanel />}
+            {section === "Student Profile" && <StudentProfilePanel />}
             {section === "Overview" && (
               <>
                 <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-600 p-7 text-white md:p-10">
