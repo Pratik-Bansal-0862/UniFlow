@@ -92,16 +92,48 @@ class StudentProfileService:
                 }
             )
 
-        raw = self.llm_service.generate(
-            system_prompt=SYSTEM_PROMPT,
-            user_prompt=(
-                "Extract the profile from this evidence. "
-                "The evidence IDs are assigned by the server.\n\n"
-                + json.dumps(prompt_evidence, ensure_ascii=False)
-            ),
+        # Keep the prompt bounded so the model is less likely to return
+        # incomplete JSON. Evidence IDs remain server-assigned.
+        compact_evidence = []
+        for item in prompt_evidence[:8]:
+            compact_evidence.append({
+                **item,
+                "text": item["text"][:1800],
+            })
+
+        prompt = (
+            "Extract a concise student profile from the evidence below. "
+            "Return ONLY one complete JSON object matching the requested "
+            "schema. No markdown or commentary. Keep values short and "
+            "include only directly supported facts. The evidence IDs are "
+            "assigned by the server.\n\n"
+            + json.dumps(compact_evidence, ensure_ascii=False)
         )
 
-        payload = self._parse_json(raw)
+        try:
+            raw = self.llm_service.generate(
+                system_prompt=SYSTEM_PROMPT,
+                user_prompt=prompt,
+            )
+            payload = self._parse_json(raw)
+        except (ValueError, json.JSONDecodeError):
+            # Retry once with a smaller prompt; do not accept partial JSON.
+            retry_evidence = [
+                {**item, "text": item["text"][:900]}
+                for item in compact_evidence[:4]
+            ]
+            retry_prompt = (
+                "Return ONLY a complete valid JSON object with all seven "
+                "profile fields as arrays. Use short values, cite only "
+                "provided evidence IDs, and omit unsupported facts. "
+                "No markdown.\n\n"
+                + json.dumps(retry_evidence, ensure_ascii=False)
+            )
+            raw = self.llm_service.generate(
+                system_prompt=SYSTEM_PROMPT,
+                user_prompt=retry_prompt,
+            )
+            payload = self._parse_json(raw)
         profile: dict[str, list[dict[str, Any]]] = {}
         used_sources: dict[str, dict[str, Any]] = {}
 
