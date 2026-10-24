@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 
@@ -84,6 +84,7 @@ export default function OpportunitiesPanel() {
   const [showForm, setShowForm] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [saving, setSaving] = useState(false);
+  const [matching, setMatching] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -117,6 +118,64 @@ export default function OpportunitiesPanel() {
     void load();
   }, [load]);
 
+  async function matchToProfile() {
+    setMatching(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await fetch("/api/opportunities/match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+      });
+      const data: unknown = await response.json();
+
+      if (!response.ok) {
+        throw new Error(readableError(data, `Could not match opportunities (${response.status}).`));
+      }
+      if (
+        typeof data !== "object" ||
+        data === null ||
+        !("opportunities" in data) ||
+        !Array.isArray(data.opportunities)
+      ) {
+        throw new Error("The matching service returned an unexpected response.");
+      }
+
+      const matches = data.opportunities as Array<{
+        id: string;
+        match_score: number | null;
+        match_rationale: string | null;
+        missing_requirements?: string[];
+      }>;
+      const byId = new Map(matches.map((match) => [match.id, match]));
+
+      setItems((current) =>
+        current.map((item) => {
+          const match = byId.get(item.id);
+          return match
+            ? {
+                ...item,
+                match_score: match.match_score,
+                match_rationale: match.match_rationale,
+                missing_requirements: match.missing_requirements ?? [],
+              }
+            : item;
+        })
+      );
+
+      setNotice(
+        matches.length
+          ? `Profile matching complete for ${matches.length} opportunity record(s). Scores show text overlap, not hiring probability or confirmed eligibility.`
+          : "No opportunities were returned for matching. Discover listings first and ensure you have personal documents."
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not match opportunities to your profile.");
+    } finally {
+      setMatching(false);
+    }
+  }
   async function createManual(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
@@ -214,13 +273,22 @@ export default function OpportunitiesPanel() {
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-100">
           Student opportunities
         </p>
-        <div className="mt-5"><OpportunityDiscoveryButton onComplete={() => { void load(); }} /></div>
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <OpportunityDiscoveryButton onComplete={() => { void load(); }} />
+          <button
+            type="button"
+            onClick={() => void matchToProfile()}
+            disabled={matching || loading || items.length === 0}
+            className="rounded-xl border border-white/40 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {matching ? "Matching profile..." : "Match to my profile"}
+          </button>
+        </div>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Your next opportunity starts here.</h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-indigo-100">
-              Keep internships, scholarships, and other opportunities organized. External discovery
-              and Gmail syncing are separate integrations and are not active in this screen yet.
+              Discover student and early-career roles from supported public sources, then match listings against your personal profile. Scores indicate text relevance, not guaranteed eligibility. Gmail syncing is a separate integration.
             </p>
           </div>
           <button type="button" onClick={() => setShowForm((value) => !value)}
@@ -331,8 +399,7 @@ export default function OpportunitiesPanel() {
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-indigo-50 text-2xl text-indigo-700">↗</div>
             <h4 className="mt-4 font-bold">No opportunities here yet</h4>
             <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
-              Add an opportunity manually to start organizing your list. Online discovery will be
-              connected separately once a verifiable free source is integrated.
+              Discover listings from supported public sources, or add an opportunity manually. Match discovered opportunities against your profile to review relevant roles.
             </p>
             <button type="button" onClick={() => setShowForm(true)} className={`${buttonClass} mt-4`}>
               Add your first opportunity

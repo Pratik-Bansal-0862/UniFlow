@@ -1,8 +1,7 @@
-from fastapi import APIRouter
+﻿from fastapi import APIRouter
 
 from app.api.v1.embedding_explorer import router as embedding_explorer_router
-from app.api.v1 import auth, documents, health, opportunities, orchestrator, profile
-
+from app.api.v1 import auth, documents, health, opportunities, orchestrator, profile, opportunity_matching
 api_router = APIRouter()
 
 api_router.include_router(embedding_explorer_router)
@@ -28,3 +27,9 @@ api_router.include_router(
     prefix="/profile",
     tags=["Student Profile"],
 )
+api_router.include_router(
+    opportunity_matching.router,
+    prefix="/opportunities",
+    tags=["Opportunity Matching"],
+)
+
