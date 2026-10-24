@@ -2,8 +2,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_current_student
+from app.core.dependencies import get_current_student, get_db
 from app.models.student import Student
 from app.schemas.agent_plan import AgentPlan
 from app.services.orchestrator_service import OrchestratorService
@@ -20,12 +21,14 @@ class PlanRequest(BaseModel):
 def create_plan(
     request: PlanRequest,
     student: Annotated[Student, Depends(get_current_student)],
+    db: Annotated[Session, Depends(get_db)],
 ) -> AgentPlan:
     try:
         return OrchestratorService().plan(
             request.objective,
             student_id=str(student.id),
             limit=request.limit,
+            db=db,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
