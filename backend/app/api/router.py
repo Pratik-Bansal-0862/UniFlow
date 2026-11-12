@@ -4,6 +4,11 @@ from app.api.v1.embedding_explorer import router as embedding_explorer_router
 from app.api.v1 import auth, documents, health, opportunities, orchestrator, profile, opportunity_matching
 api_router = APIRouter()
 
+from app.api.v1.agents import router as agents_router
+
+api_router.include_router(agents_router)
+
+
 api_router.include_router(embedding_explorer_router)
 api_router.include_router(health.router, tags=["Health"])
 api_router.include_router(auth.router, tags=["Authentication"])
