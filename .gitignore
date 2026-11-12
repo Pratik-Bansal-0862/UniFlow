@@ -227,3 +227,7 @@ backend/.pytest_cache/
 frontend/node_modules/
 frontend/.next/
 .env.local
+
+# UniFlow Google OAuth credentials
+/data/google_tokens/
+/backend/data/google_tokens/

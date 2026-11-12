@@ -6,6 +6,7 @@ from app.api.v1 import (
     approvals,
     auth,
     documents,
+    google_integrations,
     health,
     opportunities,
     orchestrator,
@@ -65,4 +66,10 @@ api_router.include_router(
     approvals.router,
     prefix="/approvals",
     tags=["Approvals"],
+)
+
+api_router.include_router(
+    google_integrations.router,
+    prefix="/integrations/google",
+    tags=["Google Integrations"],
 )

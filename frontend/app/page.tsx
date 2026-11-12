@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 import { EmbeddingExplorer } from "@/components/embedding-explorer";
 import { useCallback, useState } from "react";
 import OpportunitiesPanel from "./opportunities-panel";
 import StudentProfilePanel from "./student-profile-panel";
+import GoogleIntegrationsPanel from "./google-integrations-panel";
 
 import { AcademicPanel } from "./academic-panel";
 import { CommunicationPanel } from "./communication-panel";
@@ -270,7 +271,7 @@ export default function Home() {
   async function createPlan(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!objective.trim() || objective.length > 2000) {
-      setPlan({ detail: "Enter an objective of 1â€“2000 characters." });
+      setPlan({ detail: "Enter an objective of 1Ã¢â‚¬â€œ2000 characters." });
       return;
     }
     setBusy("plan");
@@ -353,7 +354,7 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <button type="button" onClick={checkProfile} disabled={busy !== null}
                 className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
-                {busy === "profile" ? "Checkingâ€Â¦" : "Check session"}
+                {busy === "profile" ? "Checking..." : "Check session"}
               </button>
               <div className="grid h-10 w-10 place-items-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">{signedIn ? String(displayName).slice(0, 1).toUpperCase() : "S"}</div>
             </div>
@@ -378,7 +379,7 @@ export default function Home() {
                     <h2 className="mt-3 text-3xl font-bold leading-tight tracking-tight md:text-4xl">Make room for what matters.</h2>
                     <p className="mt-4 max-w-xl text-sm leading-6 text-indigo-100 md:text-base">Bring your student documents together, turn goals into practical plans, and keep important decisions in your hands.</p>
                     <div className="mt-7 flex flex-wrap gap-3">
-                      <button type="button" onClick={() => setSection("AI Planner")} className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-sm hover:bg-indigo-50">Create an AI plan <span aria-hidden="true">Ã¢â€ â€”</span></button>
+                      <button type="button" onClick={() => setSection("AI Planner")} className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-sm hover:bg-indigo-50">Create an AI plan <span aria-hidden="true">ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â€</span></button>
                       <button type="button" onClick={() => openSection("Documents")} className="rounded-xl border border-white/30 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15">Manage documents</button>
                     </div>
                   </div>
@@ -388,7 +389,7 @@ export default function Home() {
 
                 <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   <MetricCard eyebrow="AI WORKSPACE" title="AI Planner" value="Ready to try" detail="Generate an evidence-grounded draft" onClick={() => setSection("AI Planner")} />
-                  <MetricCard eyebrow="YOUR FILES" title="Documents" value="Upload & search" detail="PDF and DOCX Â· up to 15 MB" onClick={() => openSection("Documents")} />
+                  <MetricCard eyebrow="YOUR FILES" title="Documents" value="Upload & search" detail="PDF and DOCX Ã‚Â· up to 15 MB" onClick={() => openSection("Documents")} />
                   <MetricCard eyebrow="ORGANIZATION" title="Tasks" value="Coming soon" detail="Task tracking is not connected yet" onClick={() => setSection("Tasks")} />
                   <MetricCard eyebrow="USER CONTROL" title="Approvals" value="Coming soon" detail="No external actions run automatically" onClick={() => setSection("Approvals")} />
                 </section>
@@ -397,7 +398,7 @@ export default function Home() {
                   <section className="rounded-2xl border border-slate-200 bg-white p-6">
                     <div className="flex items-start justify-between gap-4">
                       <div><p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400">Quick start</p><h3 className="mt-2 text-lg font-bold">Build your student context</h3><p className="mt-1 text-sm text-slate-500">Upload a resume or opportunity brief to ground your first plan.</p></div>
-                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-50 text-lg text-indigo-700">Ã¢Å“Â³</span>
+                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-50 text-lg text-indigo-700">ÃƒÂ¢Ã…â€œÃ‚Â³</span>
                     </div>
                     <ol className="mt-5 space-y-4">
                       <QuickStep number="01" title="Sign in to your workspace" detail="Use your existing account or create one below." />
@@ -410,6 +411,7 @@ export default function Home() {
                     <h3 className="mt-2 text-lg font-bold">{signedIn ? `Welcome, ${String(displayName)}` : "Sign in to get started"}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-500">{signedIn ? "Your session was checked successfully. Your documents and plans are scoped to your account." : "Authentication protects your personal document workspace. Sign in below, then use Check session to verify access."}</p>
                     {profileResult && <ResponsePanel title="Profile response" data={profileResult} />}
+                <GoogleIntegrationsPanel />
                     {authResult && <ResponsePanel title="Authentication response" data={authResult} />}
                   </section>
                 </div>
@@ -426,7 +428,7 @@ export default function Home() {
                     {mode === "register" && <Field label="Full name (optional)"><input value={fullName} onChange={(event) => setFullName(event.target.value)} maxLength={200} className={inputClass} placeholder="Student name" /></Field>}
                     <Field label="Email"><input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} className={inputClass} placeholder="student@example.com" /></Field>
                     <Field label="Password"><input type="password" required minLength={mode === "register" ? 12 : undefined} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} className={inputClass} placeholder={mode === "register" ? "At least 12 characters" : "Your password"} /></Field>
-                    <div className="flex items-end"><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "auth" ? "Please waitâ€Â¦" : mode === "register" ? "Create account" : "Sign in"}</button></div>
+                    <div className="flex items-end"><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "auth" ? "Please waitÃ¢â‚¬ÂÃ‚Â¦" : mode === "register" ? "Create account" : "Sign in"}</button></div>
                   </form>
                   {authResult && <ResponsePanel title="Authentication response" data={authResult} />}
                 </section>
@@ -436,10 +438,10 @@ export default function Home() {
             {section === "AI Planner" && (
               <>
                 <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
-                  <div className="flex items-start gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-indigo-50 text-2xl text-indigo-700">Ã¢Å“Â³</span><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Evidence-grounded planning</p><h2 className="mt-1 text-2xl font-bold tracking-tight">What would you like to work toward?</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">UniFlow uses your relevant uploaded documents to create a draft plan. It does not send emails, submit applications, or perform external actions.</p></div></div>
+                  <div className="flex items-start gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-indigo-50 text-2xl text-indigo-700">ÃƒÂ¢Ã…â€œÃ‚Â³</span><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Evidence-grounded planning</p><h2 className="mt-1 text-2xl font-bold tracking-tight">What would you like to work toward?</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">UniFlow uses your relevant uploaded documents to create a draft plan. It does not send emails, submit applications, or perform external actions.</p></div></div>
                   <form onSubmit={createPlan} className="mt-7 space-y-4">
-                    <label className="block text-sm font-semibold text-slate-700">Your objective<textarea required minLength={1} maxLength={2000} rows={5} value={objective} onChange={(event) => setObjective(event.target.value)} className={`${inputClass} mt-2 resize-y leading-6`} placeholder="Describe the outcome you want and any constraintsâ€Â¦" /></label>
-                    <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-slate-400">{objective.length}/2000 characters Â· Upload relevant documents first</span><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "plan" ? "Building draftâ€Â¦" : "Generate draft plan Ã¢â€ â€”"}</button></div>
+                    <label className="block text-sm font-semibold text-slate-700">Your objective<textarea required minLength={1} maxLength={2000} rows={5} value={objective} onChange={(event) => setObjective(event.target.value)} className={`${inputClass} mt-2 resize-y leading-6`} placeholder="Describe the outcome you want and any constraintsÃ¢â‚¬ÂÃ‚Â¦" /></label>
+                    <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-slate-400">{objective.length}/2000 characters Ã‚Â· Upload relevant documents first</span><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "plan" ? "Building draftÃ¢â‚¬ÂÃ‚Â¦" : "Generate draft plan ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â€"}</button></div>
                   </form>
                 </section>
 
@@ -447,7 +449,7 @@ export default function Home() {
                   <section aria-live="polite" className="space-y-5">
                     {plan.detail && <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{plan.detail}</div>}
                     {plan.status && <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5"><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400">Planner status</p><h3 className="mt-1 text-xl font-bold">{plan.status === "blocked" ? "More context needed" : "Draft plan created"}</h3></div><span className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wide ${plan.status === "blocked" ? "bg-amber-100 text-amber-800" : "bg-indigo-100 text-indigo-700"}`}>{plan.status}</span></div>}
-                    {plan.steps && plan.steps.length > 0 && <div className="rounded-2xl border border-slate-200 bg-white p-6"><h3 className="text-lg font-bold">Your next steps</h3><div className="mt-5 space-y-4">{plan.steps.map((step, index) => <article key={step.step_id} className="flex gap-4 rounded-xl border border-slate-100 p-4"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-indigo-50 text-sm font-bold text-indigo-700">{String(index + 1).padStart(2, "0")}</span><div className="min-w-0 flex-1"><h4 className="font-semibold">{step.description}</h4><p className="mt-1 text-xs text-slate-400">Step ID: {step.step_id}{step.depends_on.length ? ` Â· Depends on: ${step.depends_on.join(", ")}` : ""}</p>{step.requires_approval && <span className="mt-2 inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">Would require approval</span>}</div></article>)}</div></div>}
+                    {plan.steps && plan.steps.length > 0 && <div className="rounded-2xl border border-slate-200 bg-white p-6"><h3 className="text-lg font-bold">Your next steps</h3><div className="mt-5 space-y-4">{plan.steps.map((step, index) => <article key={step.step_id} className="flex gap-4 rounded-xl border border-slate-100 p-4"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-indigo-50 text-sm font-bold text-indigo-700">{String(index + 1).padStart(2, "0")}</span><div className="min-w-0 flex-1"><h4 className="font-semibold">{step.description}</h4><p className="mt-1 text-xs text-slate-400">Step ID: {step.step_id}{step.depends_on.length ? ` Ã‚Â· Depends on: ${step.depends_on.join(", ")}` : ""}</p>{step.requires_approval && <span className="mt-2 inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">Would require approval</span>}</div></article>)}</div></div>}
                     {plan.warnings && plan.warnings.length > 0 && <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5"><h3 className="font-bold text-amber-900">Things to review</h3><ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-amber-900">{plan.warnings.map((warning, index) => <li key={`${index}-${warning}`}>{warning}</li>)}</ul></div>}
                     {plan.evidence_ids && <p className="text-xs text-slate-400">Evidence chunks referenced: {plan.evidence_ids.length}. Verify important details before relying on this draft.</p>}
                   </section>
@@ -459,12 +461,12 @@ export default function Home() {
             {section === "Documents" && (
               <>
                 <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
-                  <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Knowledge base</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Your documents</h2><p className="mt-2 text-sm leading-6 text-slate-500">Upload PDF or DOCX files to make relevant context available to document search and AI planning.</p></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-indigo-50 text-xl text-indigo-700">Ã¢â€“Â¤</span></div>
+                  <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Knowledge base</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Your documents</h2><p className="mt-2 text-sm leading-6 text-slate-500">Upload PDF or DOCX files to make relevant context available to document search and AI planning.</p></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-indigo-50 text-xl text-indigo-700">ÃƒÂ¢Ã¢â‚¬â€œÃ‚Â¤</span></div>
                   <form onSubmit={uploadDocument} className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
                     <label className="block text-sm font-semibold">Choose a document<input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => setFile(event.target.files?.[0] ?? null)} className="mt-3 block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-100 file:px-4 file:py-2 file:font-semibold file:text-indigo-700 hover:file:bg-indigo-200" /></label>
-                    <p className="mt-3 text-xs text-slate-400">PDF or DOCX Â· Maximum 15 MB</p>
+                    <p className="mt-3 text-xs text-slate-400">PDF or DOCX Ã‚Â· Maximum 15 MB</p>
                     {file && <p className="mt-2 text-sm text-slate-600">Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)</p>}
-                    <button type="submit" disabled={busy !== null} className={`${primaryButton} mt-5`}>{busy === "upload" ? "Uploading and processingâ€Â¦" : "Upload document"}</button>
+                    <button type="submit" disabled={busy !== null} className={`${primaryButton} mt-5`}>{busy === "upload" ? "Uploading and processingÃ¢â‚¬ÂÃ‚Â¦" : "Upload document"}</button>
                   </form>
                   {uploadResult && <ResponsePanel title="Upload result" data={uploadResult} />}
                 </section>
@@ -510,7 +512,7 @@ export default function Home() {
                           <div className="min-w-0">
                             <h3 className="break-words font-semibold text-slate-900">{document.filename}</h3>
                             <p className="mt-1 text-xs text-slate-500">
-                              Status: {document.status} · Added {new Date(document.created_at).toLocaleDateString()}
+                              Status: {document.status} Â· Added {new Date(document.created_at).toLocaleDateString()}
                             </p>
                           </div>
                           <label className="flex shrink-0 flex-col gap-1 text-sm">
@@ -526,9 +528,9 @@ export default function Home() {
                               }
                               className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 disabled:opacity-50"
                             >
-                              <option value="personal">Personal — about me</option>
-                              <option value="reference">Reference — other person/source</option>
-                              <option value="unverified">Unverified — not classified</option>
+                              <option value="personal">Personal â€” about me</option>
+                              <option value="reference">Reference â€” other person/source</option>
+                              <option value="unverified">Unverified â€” not classified</option>
                             </select>
                           </label>
                         </article>
@@ -541,7 +543,7 @@ export default function Home() {
                   <p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Semantic search</p><h2 className="mt-1 text-xl font-bold">Find information in your files</h2><p className="mt-2 text-sm text-slate-500">Get an AI-generated answer grounded in your files, alongside the source text it uses.</p>
                   <form onSubmit={searchDocuments} className="mt-5 space-y-4">
                     <label className="block text-sm font-semibold">Search query<textarea required minLength={1} maxLength={2000} value={query} onChange={(event) => setQuery(event.target.value)} rows={3} className={`${inputClass} mt-2 resize-y`} placeholder="What does my resume say about project experience?" /></label>
-                    <div className="flex flex-wrap items-end gap-4"><label className="block text-sm font-semibold">Maximum results (1â€“20)<input type="number" min={1} max={20} step={1} required value={limit} onChange={(event) => setLimit(event.target.value)} className={`${inputClass} mt-2 w-36`} /></label><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "search" ? "Searchingâ€Â¦" : "Search documents"}</button></div>
+                    <div className="flex flex-wrap items-end gap-4"><label className="block text-sm font-semibold">Maximum results (1Ã¢â‚¬â€œ20)<input type="number" min={1} max={20} step={1} required value={limit} onChange={(event) => setLimit(event.target.value)} className={`${inputClass} mt-2 w-36`} /></label><button type="submit" disabled={busy !== null} className={primaryButton}>{busy === "search" ? "SearchingÃ¢â‚¬ÂÃ‚Â¦" : "Search documents"}</button></div>
                   </form>
                   {searchResult?.detail && <div className="mt-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{searchResult.detail}</div>}
                   {searchResult && (
@@ -572,17 +574,31 @@ export default function Home() {
                         </p>
                       )}
                     </div>
-                  )}                  {searchResult?.results && <div className="mt-6 space-y-4"><h3 className="font-bold">Retrieved chunks: {searchResult.results.length}</h3>{searchResult.results.length === 0 && <p className="text-sm text-slate-500">No matching chunks were returned. Check that a document was uploaded and that your query relates to its contents.</p>}{searchResult.results.map((item, index) => <article key={`${item.document_id}-${item.chunk_index}-${index}`} className="rounded-xl border border-slate-200 p-4"><div className="flex flex-wrap items-start justify-between gap-2"><h4 className="font-semibold">{item.filename}</h4><span className="rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-500">Chunk {item.chunk_index} · Distance {typeof item.distance === "number" && Number.isFinite(item.distance) ? item.distance.toFixed(4) : "n/a"}</span></div><p className="mt-2 text-xs font-medium text-slate-600">Source category: <span className={item.category === "personal" ? "text-emerald-700" : item.category === "reference" ? "text-indigo-700" : "text-amber-700"}>{item.category}</span></p><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">{item.text}</p></article>)}</div>}
+                  )}                  {searchResult?.results && <div className="mt-6 space-y-4"><h3 className="font-bold">Retrieved chunks: {searchResult.results.length}</h3>{searchResult.results.length === 0 && <p className="text-sm text-slate-500">No matching chunks were returned. Check that a document was uploaded and that your query relates to its contents.</p>}{searchResult.results.map((item, index) => <article key={`${item.document_id}-${item.chunk_index}-${index}`} className="rounded-xl border border-slate-200 p-4"><div className="flex flex-wrap items-start justify-between gap-2"><h4 className="font-semibold">{item.filename}</h4><span className="rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-500">Chunk {item.chunk_index} Â· Distance {typeof item.distance === "number" && Number.isFinite(item.distance) ? item.distance.toFixed(4) : "n/a"}</span></div><p className="mt-2 text-xs font-medium text-slate-600">Source category: <span className={item.category === "personal" ? "text-emerald-700" : item.category === "reference" ? "text-indigo-700" : "text-amber-700"}>{item.category}</span></p><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">{item.text}</p></article>)}</div>}
                 </section>
               </>
             )}
 
             {(section === "Tasks" || section === "Approvals") && <ComingSoon section={section} onGoPlanner={() => setSection("AI Planner")} />}
             {section === "Settings" && (
-              <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8"><p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Workspace settings</p><h2 className="mt-1 text-2xl font-bold">Account and session</h2><p className="mt-2 text-sm leading-6 text-slate-500">UniFlow keeps the authentication token in an HTTP-only cookie. Check your current session below; no token or secret is displayed here.</p><button type="button" onClick={checkProfile} disabled={busy !== null} className={`${primaryButton} mt-5`}>{busy === "profile" ? "Checkingâ€Â¦" : "Check current session"}</button>{profileResult && <ResponsePanel title="Profile response" data={profileResult} />}</section>
+              <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
+                <p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Workspace settings</p>
+                <h2 className="mt-1 text-2xl font-bold">Account and session</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">UniFlow keeps the authentication token in an HTTP-only cookie. Check your current session below; no token or secret is displayed here.</p>
+                <button
+                  type="button"
+                  onClick={checkProfile}
+                  disabled={busy !== null}
+                  className="mt-5 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {busy === "profile" ? "Checking..." : "Check current session"}
+                </button>
+                {profileResult && <ResponsePanel title="Profile response" data={profileResult} />}
+                <GoogleIntegrationsPanel />
+              </section>
             )}
 
-            <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-5 text-xs text-slate-400"><span>UniFlow Â· Student productivity workspace</span><span>AI plans are drafts Â· You stay in control</span></footer>
+            <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-5 text-xs text-slate-400"><span>UniFlow Ã‚Â· Student productivity workspace</span><span>AI plans are drafts Ã‚Â· You stay in control</span></footer>
           </div>
         </div>
       </div>
@@ -612,5 +628,28 @@ function ResponsePanel({ title, data }: { title: string; data: ApiResult }) {
 
 function ComingSoon({ section, onGoPlanner }: { section: "Tasks" | "Approvals"; onGoPlanner: () => void }) {
   const isTasks = section === "Tasks";
-  return <section className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center md:px-12"><span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-indigo-50 text-3xl text-indigo-700">{isTasks ? "Ã¢Å“â€œ" : "Ã¢â€ â€”"}</span><p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600">Planned feature</p><h2 className="mt-2 text-2xl font-bold">{isTasks ? "A clearer next step, every time." : "Your approval, always required."}</h2><p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">{isTasks ? "Task creation, status tracking, and reminders are not connected to the backend yet. We are keeping this area honest instead of showing mock tasks." : "Approval queues and controlled execution are not implemented yet. UniFlow currently creates draft plans only; it does not send emails or submit applications."}</p><button type="button" onClick={onGoPlanner} className={`${primaryButton} mt-6`}>Try the AI Planner</button></section>;
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center md:px-12">
+      <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-indigo-50 text-3xl text-indigo-700">
+        {isTasks ? "T" : "A"}
+      </span>
+      <p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600">Planned feature</p>
+      <h2 className="mt-2 text-2xl font-bold">
+        {isTasks ? "A clearer next step, every time." : "Your approval, always required."}
+      </h2>
+      <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">
+        {isTasks
+          ? "Task creation, status tracking, and reminders are not connected to the backend yet. We are keeping this area honest instead of showing mock tasks."
+          : "Approval queues and controlled execution are not implemented yet. UniFlow currently creates draft plans only; it does not send emails or submit applications."}
+      </p>
+      <button
+        type="button"
+        onClick={onGoPlanner}
+        className="mt-6 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
+      >
+        Try the AI Planner
+      </button>
+    </section>
+  );
 }
+
