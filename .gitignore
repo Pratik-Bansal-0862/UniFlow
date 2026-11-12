@@ -231,3 +231,10 @@ frontend/.next/
 # UniFlow Google OAuth credentials
 /data/google_tokens/
 /backend/data/google_tokens/
+
+# Local databases and runtime data
+/data/
+backend/data/
+
+# Google OAuth token files
+*.token
