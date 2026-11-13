@@ -7,6 +7,7 @@ import GoogleIntegrationsPanel from "./google-integrations-panel";
 
 import { AcademicPanel } from "./academic-panel";
 import { CommunicationPanel } from "./communication-panel";
+import TasksApprovalsPanel from "./tasks-approvals-panel";
 
 type ApiResult = {
   detail?: string;
@@ -579,7 +580,9 @@ export default function Home() {
               </>
             )}
 
-            {(section === "Tasks" || section === "Approvals") && <ComingSoon section={section} onGoPlanner={() => setSection("AI Planner")} />}
+            {(section === "Tasks" || section === "Approvals") && (
+              <TasksApprovalsPanel section={section} />
+            )}
             {section === "Settings" && (
               <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
                 <p className="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">Workspace settings</p>
