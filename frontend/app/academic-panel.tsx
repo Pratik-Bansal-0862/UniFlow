@@ -2,11 +2,25 @@
 
 import { useState } from "react";
 
+type AcademicMilestone = {
+  week: string | number;
+  topic: string;
+  estimated_hours: number | string;
+  action_items?: string[];
+};
+
+type AcademicPlanResponse = {
+  summary?: string;
+  coursework_gaps?: string[];
+  milestones?: AcademicMilestone[];
+  detail?: string;
+};
+
 export function AcademicPanel() {
   const [goal, setGoal] = useState("");
   const [targetDate, setTargetDate] = useState("Next 4 weeks");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<AcademicPlanResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleGenerate(e: React.FormEvent) {
@@ -22,16 +36,16 @@ export function AcademicPanel() {
       const data = await response_data(res);
       if (!res.ok) throw new Error(data.detail || "Failed to generate plan");
       setResult(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to generate plan");
     } finally {
       setLoading(false);
     }
   }
 
-  async function response_data(res: Response) {
+  async function response_data(res: Response): Promise<AcademicPlanResponse> {
     try {
-      return await res.json();
+      return (await res.json()) as AcademicPlanResponse;
     } catch {
       return {};
     }
@@ -91,11 +105,11 @@ export function AcademicPanel() {
             <p className="text-sm text-indigo-800 mt-1">{result.summary}</p>
           </div>
 
-          {result.coursework_gaps?.length > 0 && (
+          {(result.coursework_gaps?.length ?? 0) > 0 && (
             <div className="p-5 bg-amber-50 rounded-xl border border-amber-100">
               <h3 className="font-semibold text-amber-900">Identified Gaps</h3>
               <ul className="list-disc list-inside text-sm text-amber-800 mt-2 space-y-1">
-                {result.coursework_gaps.map((gap: string, idx: number) => (
+                {(result.coursework_gaps ?? []).map((gap: string, idx: number) => (
                   <li key={idx}>{gap}</li>
                 ))}
               </ul>
@@ -104,7 +118,7 @@ export function AcademicPanel() {
 
           <div className="space-y-3">
             <h3 className="text-base font-semibold text-slate-800">Weekly Milestones</h3>
-            {result.milestones?.map((m: any, idx: number) => (
+            {result.milestones?.map((m: AcademicMilestone, idx: number) => (
               <div key={idx} className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-slate-900">{m.week}: {m.topic}</span>

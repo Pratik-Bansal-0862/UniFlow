@@ -1,23 +1,32 @@
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
-from uuid import UUID
 
 from app.core.dependencies import get_current_student, get_db
 from app.models.student import Student
+from app.models.approval import Approval
 from app.schemas.approval import ApprovalDecision, ApprovalRead
-from app.services.approval_service import (
-    ApprovalError,
-    decide_approval,
-)
+from app.services.approval_service import ApprovalError, decide_approval
 
 router = APIRouter()
 
 
-@router.post(
-    "/{approval_id}/decision",
-    response_model=ApprovalRead,
-)
+@router.get("", response_model=list[ApprovalRead])
+def list_approvals(
+    current_student: Student = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    statement = (
+        select(Approval)
+        .where(Approval.student_id == current_student.id)
+        .order_by(Approval.created_at.desc())
+    )
+    return list(db.scalars(statement).all())
+
+
+@router.post("/{approval_id}/decision", response_model=ApprovalRead)
 def submit_approval_decision(
     approval_id: UUID,
     payload: ApprovalDecision,
@@ -31,18 +40,15 @@ def submit_approval_decision(
             student_id=current_student.id,
             decision=payload.decision,
         )
-
         db.commit()
         db.refresh(approval)
         return approval
-
     except ApprovalError as exc:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
-
     except Exception:
         db.rollback()
         raise

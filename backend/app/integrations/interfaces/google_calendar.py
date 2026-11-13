@@ -4,7 +4,30 @@ from typing import Any
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+import socket
 
+_original_getaddrinfo = socket.getaddrinfo
+
+
+def _google_calendar_ipv4_getaddrinfo(
+    host, port, family=0, type=0, proto=0, flags=0
+):
+    results = _original_getaddrinfo(
+        host, port, family, type, proto, flags
+    )
+
+    if isinstance(host, str) and host.lower() == "www.googleapis.com":
+        ipv4_results = [
+            result for result in results
+            if result[0] == socket.AF_INET
+        ]
+        if ipv4_results:
+            return ipv4_results
+
+    return results
+
+
+socket.getaddrinfo = _google_calendar_ipv4_getaddrinfo
 
 class GoogleCalendarError(Exception):
     """Raised when a Google Calendar operation fails."""

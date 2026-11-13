@@ -5,6 +5,30 @@ from typing import Any
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+import socket
+
+_original_getaddrinfo = socket.getaddrinfo
+
+
+def _gmail_ipv4_getaddrinfo(
+    host, port, family=0, type=0, proto=0, flags=0
+):
+    results = _original_getaddrinfo(
+        host, port, family, type, proto, flags
+    )
+
+    if isinstance(host, str) and host.lower() == "gmail.googleapis.com":
+        ipv4_results = [
+            result for result in results
+            if result[0] == socket.AF_INET
+        ]
+        if ipv4_results:
+            return ipv4_results
+
+    return results
+
+
+socket.getaddrinfo = _gmail_ipv4_getaddrinfo
 
 
 class _HTMLTextExtractor(HTMLParser):

@@ -2,13 +2,20 @@
 
 import { useState } from "react";
 
+type CommunicationDraft = {
+  subject?: string;
+  body?: string;
+  suggested_next_steps?: string[];
+  detail?: string;
+};
+
 export function CommunicationPanel() {
   const [recipientType, setRecipientType] = useState("recruiter");
   const [recipientName, setRecipientName] = useState("");
   const [company, setCompany] = useState("");
   const [intent, setIntent] = useState("");
   const [loading, setLoading] = useState(false);
-  const [draft, setDraft] = useState<any>(null);
+  const [draft, setDraft] = useState<CommunicationDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -30,11 +37,11 @@ export function CommunicationPanel() {
         }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as CommunicationDraft;
       if (!res.ok) throw new Error(data.detail || "Failed to draft email");
       setDraft(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to draft email");
     } finally {
       setLoading(false);
     }
@@ -145,11 +152,11 @@ export function CommunicationPanel() {
             </pre>
           </div>
 
-          {draft.suggested_next_steps?.length > 0 && (
+          {(draft.suggested_next_steps?.length ?? 0) > 0 && (
             <div className="pt-2">
               <span className="text-xs uppercase text-slate-400 font-semibold tracking-wider">Next Steps</span>
               <ul className="list-disc list-inside text-xs text-slate-600 mt-1 space-y-0.5">
-                {draft.suggested_next_steps.map((step: string, i: number) => (
+                {(draft.suggested_next_steps ?? []).map((step: string, i: number) => (
                   <li key={i}>{step}</li>
                 ))}
               </ul>

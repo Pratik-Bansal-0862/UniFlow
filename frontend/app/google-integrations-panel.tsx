@@ -19,8 +19,6 @@ export default function GoogleIntegrationsPanel() {
   const [message, setMessage] = useState<string | null>(null);
 
   const refreshStatus = useCallback(async () => {
-    setLoading(true);
-    setError(null);
 
     try {
       const response = await fetch("/api/integrations/google/status", {
@@ -43,13 +41,46 @@ export default function GoogleIntegrationsPanel() {
   }, []);
 
   useEffect(() => {
-    void refreshStatus();
+    let cancelled = false;
 
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("google") === "connected") {
-      setMessage("Google authorization completed. Refreshing connection status...");
+    async function loadInitialStatus() {
+      try {
+        const response = await fetch("/api/integrations/google/status", {
+          cache: "no-store",
+        });
+        const data: GoogleStatus = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || "Could not check Google connection.");
+        }
+
+        if (!cancelled) {
+          setStatus(data);
+
+          const params = new URLSearchParams(window.location.search);
+          if (params.get("google") === "connected") {
+            setMessage("Google authorization completed. Refreshing connection status...");
+          }
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Could not check Google connection."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
     }
-  }, [refreshStatus]);
+
+    void loadInitialStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function connectGoogle() {
     setConnecting(true);

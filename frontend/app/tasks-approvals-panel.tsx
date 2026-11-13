@@ -48,7 +48,7 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 function displayValue(value: unknown): string {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") return "?";
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
 }
@@ -76,8 +76,6 @@ export default function TasksApprovalsPanel({ section }: { section: "Tasks" | "A
   const [location, setLocation] = useState("");
 
   const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
     try {
       const [actionData, approvalData] = await Promise.all([
         requestJson<AgentAction[]>("/api/actions"),
@@ -92,7 +90,37 @@ export default function TasksApprovalsPanel({ section }: { section: "Tasks" | "A
     }
   }, []);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadInitialData() {
+      try {
+        const [actionData, approvalData] = await Promise.all([
+          requestJson<AgentAction[]>("/api/actions"),
+          requestJson<Approval[]>("/api/approvals"),
+        ]);
+
+        if (!cancelled) {
+          setActions(actionData);
+          setApprovals(approvalData);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not load actions.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadInitialData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function createGmailDraft(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
