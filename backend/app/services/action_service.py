@@ -36,11 +36,7 @@ def create_action(
         raise ActionError("Idempotency key is too long.")
 
     arguments = arguments or {}
-
-    payload_hash = calculate_payload_hash(
-        tool_name,
-        arguments,
-    )
+    payload_hash = calculate_payload_hash(tool_name, arguments)
 
     existing = db.execute(
         select(AgentAction).where(
@@ -54,7 +50,6 @@ def create_action(
             raise ActionError(
                 "Idempotency key was already used for a different action."
             )
-
         return existing
 
     action = AgentAction(
@@ -68,7 +63,6 @@ def create_action(
 
     db.add(action)
     db.flush()
-
     return action
 
 
@@ -77,11 +71,7 @@ def claim_action_for_execution(
     action_id: UUID,
     student_id: UUID,
 ) -> AgentAction:
-    """
-    Atomically move an approved action into executing state.
-
-    The caller must commit this transaction before invoking an external tool.
-    """
+    """Atomically claim an approved action before external execution."""
 
     action = db.execute(
         select(AgentAction)
@@ -119,10 +109,8 @@ def claim_action_for_execution(
 
     if approval.expires_at is not None:
         expiry = approval.expires_at
-
         if expiry.tzinfo is None:
             expiry = expiry.replace(tzinfo=timezone.utc)
-
         if expiry <= now:
             raise ActionError("Approval has expired.")
 
@@ -143,5 +131,40 @@ def claim_action_for_execution(
 
     action.status = "executing"
     db.flush()
+    return action
 
+
+def complete_action(
+    db: Session,
+    action: AgentAction,
+    result: dict,
+) -> AgentAction:
+    """Record a successful external action."""
+
+    if action.status != "executing":
+        raise ActionError("Only executing actions can be completed.")
+
+    action.status = "succeeded"
+    action.result = result
+    action.error_code = None
+    action.executed_at = datetime.now(timezone.utc)
+    db.flush()
+    return action
+
+
+def fail_action(
+    db: Session,
+    action: AgentAction,
+    error_code: str,
+) -> AgentAction:
+    """Record a failed external action without exposing sensitive details."""
+
+    if action.status != "executing":
+        raise ActionError("Only executing actions can be failed.")
+
+    action.status = "failed"
+    action.result = None
+    action.error_code = error_code[:100]
+    action.executed_at = datetime.now(timezone.utc)
+    db.flush()
     return action
