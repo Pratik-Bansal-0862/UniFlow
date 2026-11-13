@@ -51,18 +51,12 @@ from app.services.google_token_store import (
     save_google_token,
 )
 
+from app.services.google_credentials import (
+    GOOGLE_SCOPES,
+    get_google_credentials,
+)
+
 router = APIRouter()
-
-
-GOOGLE_SCOPES = [
-    "openid",
-    "email",
-    "profile",
-    "https://www.googleapis.com/auth/gmail.modify",
-    "https://www.googleapis.com/auth/gmail.send",
-    "https://www.googleapis.com/auth/calendar.events",
-]
-
 
 class GmailDraftRequest(BaseModel):
     to: str = Field(min_length=3, max_length=320)
@@ -192,7 +186,7 @@ def credentials_to_dict(credentials: Credentials) -> dict:
 
 
 def _get_credentials(student_id: UUID) -> Credentials | None:
-    token_data = load_google_token(student_id)
+    return get_google_credentials(student_id)
 
     if token_data is None:
         return None
